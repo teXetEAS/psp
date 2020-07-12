@@ -10,5 +10,4 @@ def scan(ip):
 	for item in answerdList:
 		parsDict = {"ip": item[1].psrc, "mac": item[1].hwsrc}
 		parsIpMac.append(parsDict)
-	return parsIpMac	
-
+	return parsIpMac
